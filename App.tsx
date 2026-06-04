@@ -7,7 +7,7 @@ export default function App() {
   return (
     <AuthProvider>
       <NavigationContainer>
-        <AppNavigator />
+        <Routes />
       </NavigationContainer>
     </AuthProvider>
   );
