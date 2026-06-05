@@ -40,16 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function signIn(email: string, password: string) {
-    const data = await apiFetch<{ token: string; user: User }>('/api/auth/login', {
+        const data = await apiFetch<{ token: string; usuario: User }>('/api/auth/login', {
       method: 'POST',
-      body: { email, password },
+      body: { email, senha: password },
     });
-
+    
     await AsyncStorage.setItem('token', data.token);
-    await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
+    await AsyncStorage.setItem('user', JSON.stringify(data.usuario));
     setToken(data.token);
-    setUser(data.user);
+    setUser(data.usuario);
   }
 
   async function signOut() {
