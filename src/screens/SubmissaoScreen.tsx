@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Header from '../components/Header';
 
 // TODO (Pessoa 4): implementar submissão + upload — branch feature/submissao-upload
 export default function SubmissaoScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Nova Submissão</Text>
+      <Header titulo="Enviar Certificado" />
     </View>
   );
 }

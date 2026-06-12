@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Header from '../components/Header';
 
 // TODO (Pessoa 3): implementar histórico — branch feature/progresso-historico
 export default function HistoricoScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Histórico</Text>
+      <Header titulo="Histórico" />
     </View>
   );
 }
