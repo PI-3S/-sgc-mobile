@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiFetch } from '../services/api';
+import { apiFetch, setLogoutCallback } from '../services/api';
 import { User } from '../types';
 
 interface AuthContextData {
@@ -17,6 +17,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Registra signOut no api.ts para tratamento automático de 401
+  useEffect(() => {
+    setLogoutCallback(async () => {
+      await AsyncStorage.multiRemove(['token', 'user']);
+      setToken(null);
+      setUser(null);
+    });
+  }, []);
 
   // Restaura sessão salva ao abrir o app
   useEffect(() => {
