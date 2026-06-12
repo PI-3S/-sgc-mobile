@@ -1,53 +1,37 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { apiFetch, apiUpload } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, fontSize, radius, spacing } from '../styles/theme';
-
-interface Regra {
-  id: string;
-  area: string;
-  limite_horas: number;
-}
+import FormField from '../components/FormField';
+import PrimaryButton from '../components/PrimaryButton';
+import RegraPicker, { Regra } from '../components/RegraPicker';
 
 export default function SubmissaoScreen() {
   const { user } = useAuth();
 
   const [regras, setRegras] = useState<Regra[]>([]);
   const [loadingRegras, setLoadingRegras] = useState(true);
-
   const [regraSelecionada, setRegraSelecionada] = useState<Regra | null>(null);
-  const [mostrarRegras, setMostrarRegras] = useState(false);
   const [tipo, setTipo] = useState('');
   const [horas, setHoras] = useState('');
   const [descricao, setDescricao] = useState('');
   const [arquivo, setArquivo] = useState<any>(null);
   const [enviando, setEnviando] = useState(false);
 
-  const cursoId = (user as any)?.curso_id;
-
   const carregarRegras = useCallback(async () => {
     try {
-      const endpoint = cursoId ? `/api/regras?curso_id=${cursoId}` : '/api/regras';
+      const endpoint = user?.curso_id ? `/api/regras?curso_id=${user.curso_id}` : '/api/regras';
       const data = await apiFetch<{ regras: Regra[] }>(endpoint);
       setRegras(data?.regras ?? (Array.isArray(data) ? data : []));
-    } catch (err: any) {
+    } catch {
       Alert.alert('Erro', 'Não foi possível carregar as áreas de atividade.');
     } finally {
       setLoadingRegras(false);
     }
-  }, [cursoId]);
+  }, [user?.curso_id]);
 
   useEffect(() => {
     carregarRegras();
@@ -55,12 +39,8 @@ export default function SubmissaoScreen() {
 
   const selecionarArquivo = async () => {
     try {
-      const res = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf', 'image/*'],
-      });
-      if (!res.canceled) {
-        setArquivo(res.assets[0]);
-      }
+      const res = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/*'] });
+      if (!res.canceled) setArquivo(res.assets[0]);
     } catch {
       Alert.alert('Erro', 'Não foi possível selecionar o arquivo.');
     }
@@ -75,27 +55,16 @@ export default function SubmissaoScreen() {
   };
 
   const enviar = async () => {
-    if (!regraSelecionada) {
-      Alert.alert('Atenção', 'Selecione a área da atividade.');
-      return;
-    }
-    if (!tipo.trim()) {
-      Alert.alert('Atenção', 'Informe o tipo da atividade.');
-      return;
-    }
-    if (!horas || isNaN(Number(horas)) || Number(horas) <= 0) {
-      Alert.alert('Atenção', 'Informe uma quantidade de horas válida.');
-      return;
-    }
-    if (!arquivo) {
-      Alert.alert('Atenção', 'Anexe o certificado antes de enviar.');
-      return;
-    }
+    if (!regraSelecionada) return Alert.alert('Atenção', 'Selecione a área da atividade.');
+    if (!tipo.trim()) return Alert.alert('Atenção', 'Informe o tipo da atividade.');
+    if (!horas || isNaN(Number(horas)) || Number(horas) <= 0)
+      return Alert.alert('Atenção', 'Informe uma quantidade de horas válida.');
+    if (!arquivo) return Alert.alert('Atenção', 'Anexe o certificado antes de enviar.');
 
     setEnviando(true);
     try {
       // Etapa 1 — criar a submissão
-      const submissao = await apiFetch<{ id: string; success: boolean }>('/api/submissoes', {
+      const { id } = await apiFetch<{ id: string }>('/api/submissoes', {
         method: 'POST',
         body: {
           regra_id: regraSelecionada.id,
@@ -105,11 +74,9 @@ export default function SubmissaoScreen() {
         },
       });
 
-      const submissaoId = submissao.id;
-
       // Etapa 2 — upload do certificado
       const formData = new FormData();
-      formData.append('submissao_id', submissaoId);
+      formData.append('submissao_id', id);
       formData.append('arquivo', {
         uri: arquivo.uri,
         name: arquivo.name,
@@ -142,75 +109,37 @@ export default function SubmissaoScreen() {
         <Text style={styles.titulo}>Enviar Certificado</Text>
         <Text style={styles.subtitulo}>Preencha os dados e anexe o comprovante.</Text>
 
-        {/* Área / Regra */}
         <Text style={styles.label}>Área da Atividade *</Text>
-        <TouchableOpacity
-          style={styles.picker}
-          onPress={() => setMostrarRegras(!mostrarRegras)}
-        >
-          <Text style={regraSelecionada ? styles.pickerTexto : styles.pickerPlaceholder}>
-            {regraSelecionada
-              ? `${regraSelecionada.area} (até ${regraSelecionada.limite_horas}h)`
-              : 'Selecionar área...'}
-          </Text>
-          <Text style={styles.pickerIcon}>{mostrarRegras ? '▲' : '▼'}</Text>
-        </TouchableOpacity>
+        <RegraPicker
+          regras={regras}
+          selecionada={regraSelecionada}
+          onSelect={setRegraSelecionada}
+        />
 
-        {mostrarRegras && (
-          <View style={styles.listaRegras}>
-            {regras.map(r => (
-              <TouchableOpacity
-                key={r.id}
-                style={[
-                  styles.itemRegra,
-                  regraSelecionada?.id === r.id && styles.itemRegraAtivo,
-                ]}
-                onPress={() => {
-                  setRegraSelecionada(r);
-                  setMostrarRegras(false);
-                }}
-              >
-                <Text style={styles.itemRegraTexto}>{r.area}</Text>
-                <Text style={styles.itemRegraLimite}>Limite: {r.limite_horas}h</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Tipo */}
-        <Text style={[styles.label, { marginTop: spacing.md }]}>Tipo da Atividade *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: Curso online, Palestra, Evento..."
-          placeholderTextColor={colors.textMuted}
+        <FormField
+          label="Tipo da Atividade *"
           value={tipo}
           onChangeText={setTipo}
+          placeholder="Ex: Curso online, Palestra, Evento..."
         />
 
-        {/* Horas */}
-        <Text style={styles.label}>Horas Solicitadas *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: 20"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="numeric"
+        <FormField
+          label="Horas Solicitadas *"
           value={horas}
           onChangeText={setHoras}
+          placeholder="Ex: 20"
+          keyboardType="numeric"
         />
 
-        {/* Descrição */}
-        <Text style={styles.label}>Descrição / Observação (opcional)</Text>
-        <TextInput
-          style={[styles.input, styles.inputMultilinha]}
-          placeholder="Informações adicionais..."
-          placeholderTextColor={colors.textMuted}
-          multiline
-          numberOfLines={4}
+        <FormField
+          label="Descrição / Observação (opcional)"
           value={descricao}
           onChangeText={setDescricao}
+          placeholder="Informações adicionais..."
+          multiline
+          numberOfLines={4}
         />
 
-        {/* Arquivo */}
         <Text style={styles.label}>Certificado (PDF ou imagem) *</Text>
         <TouchableOpacity style={styles.botaoArquivo} onPress={selecionarArquivo}>
           <Text style={styles.botaoArquivoTexto}>
@@ -218,18 +147,12 @@ export default function SubmissaoScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Botão enviar */}
-        <TouchableOpacity
-          style={[styles.botaoEnviar, enviando && styles.botaoDesabilitado]}
+        <PrimaryButton
+          label="Enviar Certificado"
           onPress={enviar}
-          disabled={enviando}
-        >
-          {enviando ? (
-            <ActivityIndicator color={colors.textPrimary} />
-          ) : (
-            <Text style={styles.botaoEnviarTexto}>Enviar Certificado</Text>
-          )}
-        </TouchableOpacity>
+          loading={enviando}
+          style={styles.botaoEnviar}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -238,56 +161,9 @@ export default function SubmissaoScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
-
   titulo: { fontSize: fontSize.xl, fontWeight: 'bold', color: colors.textPrimary, marginBottom: spacing.xs },
   subtitulo: { fontSize: fontSize.sm, color: colors.textSecondary, marginBottom: spacing.lg },
-
-  label: { fontSize: fontSize.sm, color: colors.textSecondary, marginBottom: spacing.xs, fontWeight: '600' },
-
-  input: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    color: colors.textPrimary,
-    fontSize: fontSize.md,
-    marginBottom: spacing.md,
-  },
-  inputMultilinha: { height: 96, textAlignVertical: 'top' },
-
-  picker: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  pickerTexto: { color: colors.textPrimary, fontSize: fontSize.md, flex: 1 },
-  pickerPlaceholder: { color: colors.textMuted, fontSize: fontSize.md, flex: 1 },
-  pickerIcon: { color: colors.textSecondary, marginLeft: spacing.sm },
-
-  listaRegras: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-  },
-  itemRegra: {
-    padding: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  itemRegraAtivo: { backgroundColor: colors.accent },
-  itemRegraTexto: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: '600' },
-  itemRegraLimite: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
-
+  label: { fontSize: fontSize.sm, color: colors.textSecondary, fontWeight: '600', marginBottom: spacing.xs },
   botaoArquivo: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -295,17 +171,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: spacing.sm,
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   botaoArquivoTexto: { color: colors.textPrimary, fontSize: fontSize.md },
-
-  botaoEnviar: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  botaoDesabilitado: { opacity: 0.6 },
-  botaoEnviarTexto: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: 'bold' },
+  botaoEnviar: { marginBottom: spacing.xl },
 });
