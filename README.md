@@ -71,6 +71,6 @@ Consulte `docs/API.md` para referência completa dos endpoints.
 | Nome | Branch | GitHub |
 |------|--------|--------|
 | Everson José | feature/navegacao-base | — |
-| Pessoa 2 | feature/login | — |
-| Pessoa 3 | feature/progresso-historico | — |
-| Pessoa 4 | feature/submissao-upload | — |
+|  Everson josé | feature/login | — |
+| Maria clara barbosa / Sam ferreira | feature/progresso-historico | — |
+| Erick allan | feature/submissao-upload | — |
