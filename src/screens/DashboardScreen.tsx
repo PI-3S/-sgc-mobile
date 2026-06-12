@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, ActivityIndicator, Alert } from 're
 import { colors, spacing, radius } from '../styles/theme';
 import { apiFetch } from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Header from '../components/Header';
 
 export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Header titulo="Dashboard" />
       <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
         <Text style={[styles.txt, { fontSize: 24, fontWeight: 'bold' }]}>Dashboard</Text>
         <Text style={{ color: colors.textSecondary, marginBottom: spacing.lg }}>Suas horas e submissões</Text>
