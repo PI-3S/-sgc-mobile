@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../../assets/logo-white.png';
 import {
   View,
   Text,
@@ -8,6 +9,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, radius, fontSize } from '../styles/theme';
@@ -51,6 +53,7 @@ return (
       <View style={styles.container}>
         {/* Cabeçalho */}
         <View style={styles.header}>
+          <Image source={logo} style={styles.logo} />
           <Text style={styles.title}>SGC</Text>
           <Text style={styles.subtitle}>Atividades Complementares</Text>
         </View>
@@ -116,6 +119,11 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: spacing.xl,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: spacing.md,
   },
   title: {
     fontSize: 48,
