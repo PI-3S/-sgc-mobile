@@ -64,6 +64,7 @@ export default function HistoricoScreen() {
 	    data={historyList}
 	    keyExtractor={item => item.id}
 	    renderItem={certificateItem}
+	    ListEmptyComponent={<Text>Você ainda não cadastrou certificados.</Text>}
 	    />
     </View>
     )}
