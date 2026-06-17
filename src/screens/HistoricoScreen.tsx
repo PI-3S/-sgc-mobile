@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, SafeAreaView, useWindowDimensions} from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { apiFetch } from '../services/api';
 import { colors, fontSize, getStatusStyle, radius } from '../styles/theme';
 
+interface Submissao {
+	id: string;
+	data_envio: string;
+	tipo: string;
+	carga_horaria_solicitada: number;
+	status: 'correcao' | 'pendente' | 'aprovado' | 'reprovado';
+	observacao?: string;
+}
+
 export default function HistoricoScreen() {
-	const { width, height } = useWindowDimensions();
-	const [historyList, setHistoryList]  = useState([]);
+	const [historyList, setHistoryList]  = useState<Submissao[]>([]);
 	const [isLoading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -24,7 +32,7 @@ export default function HistoricoScreen() {
 		return (`${newDate}`)
 	}
 
-	function certificateItem({ item }){
+	function certificateItem({ item } : { item: Submissao }){
 		const status = item.status == 'correcao';
 		return (
 			<View style={styles.item}>
