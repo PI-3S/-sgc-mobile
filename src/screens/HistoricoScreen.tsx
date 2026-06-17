@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { apiFetch } from '../services/api';
 import { colors, fontSize, getStatusStyle, radius } from '../styles/theme';
 
@@ -49,7 +50,9 @@ export default function HistoricoScreen() {
 		)
 	};
   return (
+	  <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.container}>
+    
       <Text style={styles.title}>Histórico{'\n'}</Text> 
     {isLoading ? (
 	    <View>
@@ -65,6 +68,7 @@ export default function HistoricoScreen() {
     </View>
     )}
     </View>
+    </SafeAreaView>
   )
 }
 const styles = StyleSheet.create({
@@ -83,6 +87,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   listContainer: {
+	  flex: 1,
 	  padding: 5,
   },
   certificateTextContainer: {
