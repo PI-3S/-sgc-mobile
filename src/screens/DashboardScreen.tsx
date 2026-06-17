@@ -21,7 +21,7 @@ export default function DashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <Header titulo="Dashboard" />
       <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
         <Text style={[styles.txt, { fontSize: 24, fontWeight: 'bold' }]}>Dashboard</Text>

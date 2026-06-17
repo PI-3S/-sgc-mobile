@@ -50,7 +50,7 @@ export default function HistoricoScreen() {
 		)
 	};
   return (
-	  <SafeAreaView style={{ flex: 1 }}>
+	  <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
     <View style={styles.container}>
     
       <Text style={styles.title}>Histórico{'\n'}</Text> 
