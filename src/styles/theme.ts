@@ -59,14 +59,14 @@ export const fontSize = {
 export function getStatusStyle(status: string) {
   switch (status) {
     case 'aprovado':
-      return { bg: colors.successBg, text: colors.success };
+      return { backgroundColor: colors.successBg, color: colors.success };
     case 'reprovado':
-      return { bg: colors.errorBg, text: colors.error };
+      return { backgroundColor: colors.errorBg, color: colors.error };
     case 'pendente':
     case 'correcao':
     case 'correção':
-      return { bg: colors.warningBg, text: colors.warning };
+      return { backgroundColor: colors.warningBg, color: colors.warning };
     default:
-      return { bg: colors.secondary, text: colors.textSecondary };
+      return { backgroundColor: colors.secondary, color: colors.textSecondary };
   }
 }
