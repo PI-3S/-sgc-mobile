@@ -59,9 +59,16 @@ export default function HistoricoScreen() {
 		)
 	};
   return (
+<<<<<<< HEAD
   <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
   <View style={styles.container}>
   <Text style={styles.title}>Histórico{'\n'}</Text> 
+=======
+	  <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={styles.container}>
+    
+      <Text style={styles.title}>Histórico{'\n'}</Text> 
+>>>>>>> 64ae46800eb9fe4def4828fa26ae783cdfa73363
     {isLoading ? (
     <View>
 	    <ActivityIndicator size ='large' color={colors.textPrimary}/>
