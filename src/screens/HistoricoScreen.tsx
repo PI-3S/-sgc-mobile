@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { apiFetch } from '../services/api';
-import { colors, fontSize, getStatusStyle, radius } from '../styles/theme';
+import { colors, fontSize, getStatusStyle, radius, spacing } from '../styles/theme';
 
 interface Submissao {
 	id: string;
@@ -16,16 +16,25 @@ interface Submissao {
 export default function HistoricoScreen() {
 	const [historyList, setHistoryList]  = useState<Submissao[]>([]);
 	const [isLoading, setLoading] = useState(false);
+	const [error, setError] = useState<String | null>(null);
 
-	useEffect(() => {
-		async function load() {
-			setLoading(true);
-			const history = await apiFetch('/api/submissoes');
-			setHistoryList(history.submissoes);
+	async function load() {
+		setLoading(true);
+		setError(null);
+		try {
+		const history = await apiFetch('/api/submissoes');
+		setHistoryList(history.submissoes);
+
+		} catch (err){
+			setError('Não foi possível carregar o histórico. Tente novamente mais tarde.');
+		} finally {
 			setLoading(false);
 		}
-		load()
-	}, [])
+	}
+
+	useEffect(() => {
+		load();
+	}, []);
 
 	function handleDate(jsdate: string){
 		const date = new Date(jsdate);
@@ -50,14 +59,18 @@ export default function HistoricoScreen() {
 		)
 	};
   return (
-	  <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-    <View style={styles.container}>
-    
-      <Text style={styles.title}>Histórico{'\n'}</Text> 
+  <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+  <View style={styles.container}>
+  <Text style={styles.title}>Histórico{'\n'}</Text> 
     {isLoading ? (
-	    <View>
-		    <ActivityIndicator size ='large' color={colors.textPrimary}/>
-	    </View>
+    <View>
+	    <ActivityIndicator size ='large' color={colors.textPrimary}/>
+    </View>
+    ) : error ? (
+    <View style={styles.centerContainer}>
+	    <Text style={styles.errorText}>{error}</Text>
+	    <Button title="Tentar novamente" onPress={load} color={colors.textPrimary} />
+    </View>
     ) : (
     <View style={styles.listContainer}>
 	    <FlatList
@@ -90,6 +103,26 @@ const styles = StyleSheet.create({
   listContainer: {
 	  flex: 1,
 	  padding: 5,
+  },
+  centerContainer: {
+	  flex: 1,
+	  justifyContent: 'center',
+	  alignItems: 'center',
+	  padding: 20,
+  },
+  errorText: {
+	  color: colors.error,
+	  backgroundColor: colors.background,
+	  fontSize: fontSize.sm,
+	  textAlign: 'center',
+	  marginBottom: spacing.xl,
+  },
+    button: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.xs,
   },
   certificateTextContainer: {
 	  paddingTop: 3,
